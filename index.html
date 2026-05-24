@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI短视频分镜导演 V2.0 · 营销版</title>
+<style>
+:root {
+  /* IKB + Cream Editorial Palette */
+  --ikb:#002FA7; --ikb-deep:#001f6e; --ikb-light:#3b6cd4; --ikb-glow:rgba(0,47,167,.12);
+  --cream:#faf8f5; --paper:#f3efe8; --beige:#e8e0d5; --warm-white:#fefdfb;
+  --ink:#1a1a24; --ink-light:#3d3a4e; --ink-muted:#787480;
+  --rust:#c47a53; --ochre:#d4953a; --sage:#7a9280;
+  --riso-red:#e0554a; --riso-blue:#1e5ab5; --riso-yellow:#f0c040;
+  --border:#d9d3ca; --border-light:#e8e3db;
+  --success:#4a8c6a; --danger:#c45550; --warning:#c48640;
+  --douyin:#d94050; --xhs:#d94a40; --shipin:#3d9a6c; --bilibili:#d96080;
+  --font-sans:'Inter','Helvetica Neue','PingFang SC','Microsoft YaHei',sans-serif;
+  --font-mono:'JetBrains Mono','SF Mono','Cascadia Code',monospace;
+  --shadow-brutal:4px 4px 0 rgba(0,0,0,.08);
+  --shadow-sm:0 1px 4px rgba(0,0,0,.04); --shadow-md:0 4px 20px rgba(0,0,0,.06);
+  --radius:2px; --radius-sm:2px; --radius-xs:1px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:var(--font-sans);background:var(--cream);color:var(--ink);height:100vh;display:flex;flex-direction:column;overflow:hidden;line-height:1.5;position:relative}
+
+/* Risograph grain texture overlay */
+body::before{content:'';position:fixed;inset:0;opacity:.035;pointer-events:none;z-index:999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size:200px 200px;}
+
+/* Geometric background decorations */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(circle at 92% 8%,rgba(0,47,167,.04) 0%,transparent 50%),
+    radial-gradient(circle at 5% 92%,rgba(196,122,83,.03) 0%,transparent 40%),
+    radial-gradient(circle at 50% 50%,rgba(240,192,64,.02) 0%,transparent 60%);
+}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:0}
+
+/* ===== HEADER — Swiss editorial ===== */
+.header{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;min-height:56px;background:var(--warm-white);border-bottom:3px solid var(--ink);z-index:10;position:relative}
+.header::after{content:'';position:absolute;bottom:-3px;left:0;width:60px;height:3px;background:var(--ikb)}
+.header-left{display:flex;align-items:center;gap:16px}
+.logo{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--ikb);color:#fff;position:relative}
+.logo::after{content:'';position:absolute;inset:-3px;border:1.5px solid var(--ikb);pointer-events:none}
+.app-name{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-0.2px;text-transform:uppercase}
+.version-badge{font-size:9px;padding:3px 8px;border:1.5px solid var(--ink);font-weight:700;letter-spacing:.8px;text-transform:uppercase;font-family:var(--font-mono)}
+.header-warm{font-size:11px;color:var(--ink-muted);font-style:italic;letter-spacing:.2px;margin-left:2px;font-family:'Georgia','Times New Roman',serif}
+.header-right{display:flex;gap:10px;align-items:center}
+
+/* ===== BUTTONS — brutalist geometric ===== */
+.btn{padding:9px 20px;font-size:12px;font-family:var(--font-sans);cursor:pointer;border:2px solid var(--ink);font-weight:700;transition:all .15s ease;display:inline-flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.4px;background:transparent;color:var(--ink);position:relative}
+.btn:hover{background:var(--ink);color:var(--cream);transform:translate(-2px,-2px);box-shadow:4px 4px 0 rgba(0,0,0,.12)}
+.btn:active{transform:translate(0,0);box-shadow:none}
+.btn-ghost{border-color:transparent;color:var(--ink-light)}
+.btn-ghost:hover{border-color:var(--ink);background:var(--ink);color:var(--cream);box-shadow:4px 4px 0 rgba(0,0,0,.12)}
+.btn-primary{background:var(--ikb);color:#fff;border-color:var(--ikb)}
+.btn-primary:hover{background:var(--ink);border-color:var(--ink);box-shadow:4px 4px 0 rgba(0,47,167,.25)}
+.btn-primary:disabled{background:var(--beige);color:var(--ink-muted);cursor:not-allowed;border-color:var(--border);box-shadow:none;transform:none}
+.btn-outline{background:transparent;border:2px solid var(--ink);color:var(--ink)}
+.btn-outline:hover{background:var(--ikb);border-color:var(--ikb);color:#fff;box-shadow:4px 4px 0 rgba(0,47,167,.2)}
+.btn-sm{padding:5px 14px;font-size:10px;letter-spacing:.6px}
+.btn-xs{padding:3px 10px;font-size:9px;letter-spacing:.5px}
+.btn-auto{background:var(--ikb);color:var(--cream);font-weight:800;width:100%;padding:14px;font-size:13px;border:2px solid var(--ikb-deep);cursor:pointer;transition:all .15s ease;letter-spacing:.8px;text-transform:uppercase;font-family:var(--font-sans);position:relative;overflow:hidden}
+.btn-auto::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.08) 50%,transparent 60%);transform:translateX(-100%);transition:transform .4s ease}
+.btn-auto:hover::before{transform:translateX(100%)}
+.btn-auto:hover{background:var(--ikb-deep);transform:translate(-2px,-2px);box-shadow:6px 6px 0 rgba(0,47,167,.2)}
+.btn-auto:disabled{background:var(--beige);border-color:var(--border);color:var(--ink-muted);cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ===== MAIN LAYOUT — Swiss grid ===== */
+.main{display:flex;flex:1;overflow:hidden;position:relative;z-index:1}
+.panel{display:flex;flex-direction:column;overflow-y:auto;padding:24px 20px;gap:16px;position:relative}
+.panel-left{width:28%;min-width:290px;border-right:1.5px solid var(--border);background:var(--warm-white)}
+.panel-center{flex:1;min-width:380px;background:var(--paper);position:relative;border-right:1.5px solid var(--border)}
+.panel-right{width:26%;min-width:260px;background:var(--warm-white)}
+
+/* Decorative Bauhaus shapes in center panel */
+.panel-center::before{content:'';position:absolute;top:40px;right:30px;width:80px;height:80px;border:2px solid var(--ikb);opacity:.06;border-radius:50%;pointer-events:none;z-index:0}
+.panel-center::after{content:'';position:absolute;bottom:60px;left:20px;width:50px;height:50px;background:var(--riso-yellow);opacity:.04;pointer-events:none;z-index:0;transform:rotate(15deg)}
+
+/* Panel title — zine-style label */
+.panel-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:var(--ink-muted);margin-bottom:-6px;font-family:var(--font-mono);border-bottom:2px solid var(--border);padding-bottom:8px;display:flex;align-items:center;gap:8px}
+.panel-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.panel-left .panel-title{color:var(--ikb);border-bottom-color:var(--ikb)}
+.panel-center .panel-title{position:relative;z-index:1}
+.panel-right .panel-title{color:var(--rust);border-bottom-color:var(--rust)}
+
+/* ===== SECTION — brut cards ===== */
+.section{background:var(--warm-white);padding:18px;border:1.5px solid var(--border);position:relative;transition:border-color .2s}
+.section:hover{border-color:var(--ink-muted)}
+.section-label{font-size:10px;font-weight:800;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px;letter-spacing:1.2px;text-transform:uppercase;font-family:var(--font-sans)}
+.section-label::before{content:'';width:8px;height:8px;background:var(--ikb);flex-shrink:0}
+
+/* ===== FORM — Swiss minimal ===== */
+textarea,select,input[type="text"],input[type="password"]{width:100%;padding:10px 12px;border:2px solid var(--border);background:var(--warm-white);color:var(--ink);font-family:var(--font-sans);font-size:13px;resize:none;outline:none;transition:all .15s ease}
+textarea:focus,select:focus,input:focus{border-color:var(--ikb);background:var(--warm-white);box-shadow:3px 3px 0 rgba(0,47,167,.08)}
+textarea{line-height:1.7}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231a1a24' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+
+/* ===== PLATFORM TAGS — geometric pills ===== */
+.platform-tags{display:flex;gap:8px;flex-wrap:wrap}
+.platform-tag{padding:8px 16px;font-size:11px;cursor:pointer;border:2px solid var(--border);background:var(--warm-white);color:var(--ink-light);transition:all .12s ease;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.platform-tag:hover{border-color:var(--ink);transform:translate(-1px,-1px);box-shadow:2px 2px 0 rgba(0,0,0,.06)}
+.platform-tag.selected.douyin{border-color:var(--douyin);background:rgba(217,64,80,.06);color:var(--douyin);font-weight:700}
+.platform-tag.selected.xiaohongshu{border-color:var(--xhs);background:rgba(217,74,64,.06);color:var(--xhs);font-weight:700}
+.platform-tag.selected.shipin{border-color:var(--shipin);background:rgba(61,154,108,.06);color:var(--shipin);font-weight:700}
+.platform-tag.selected.bilibili{border-color:var(--bilibili);background:rgba(217,96,128,.06);color:var(--bilibili);font-weight:700}
+
+/* ===== SELLING POINTS ===== */
+.sp-list{display:flex;flex-direction:column;gap:8px}
+.sp-item{display:flex;gap:8px;align-items:center}
+.sp-item input{flex:1}
+.sp-item .btn-remove{padding:6px 10px;font-size:10px;border:1.5px solid var(--danger);background:transparent;color:var(--danger);cursor:pointer;transition:all .12s ease;font-weight:700}
+.sp-item .btn-remove:hover{background:var(--danger);color:#fff}
+.sp-counter{font-size:9px;color:var(--ink-muted);text-align:right;margin-top:4px;font-family:var(--font-mono)}
+
+/* ===== SLIDER — geometric ===== */
+.slider-group{margin-bottom:6px}
+.slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.slider-label{font-size:11px;color:var(--ink-light);font-weight:600}
+.slider-value{font-size:10px;color:var(--ikb);font-weight:700;padding:2px 8px;border:1.5px solid var(--border);cursor:pointer;font-family:var(--font-mono)}
+input[type="range"]{-webkit-appearance:none;width:100%;height:3px;background:var(--border);outline:none;cursor:pointer}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--ikb);cursor:pointer;border:2px solid var(--warm-white);box-shadow:0 0 0 1.5px var(--ikb)}
+.slider-extremes{display:flex;justify-content:space-between;font-size:9px;color:var(--ink-muted);margin-top:3px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.4px}
+
+/* ===== GENERATE BUTTON — statement ===== */
+.btn-generate{width:100%;padding:18px;font-size:14px;font-weight:800;border:3px solid var(--ikb);cursor:pointer;font-family:var(--font-sans);background:var(--ikb);color:var(--cream);letter-spacing:2px;text-transform:uppercase;transition:all .15s ease;position:relative;overflow:hidden;margin-top:auto}
+.btn-generate::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.06) 50%,transparent 70%);transform:translateX(-100%);transition:transform .5s ease}
+.btn-generate:hover::after{transform:translateX(100%)}
+.btn-generate:hover{background:var(--ikb-deep);border-color:var(--ikb-deep);transform:translate(-3px,-3px);box-shadow:8px 8px 0 rgba(0,47,167,.15)}
+.btn-generate:disabled{background:var(--beige);border-color:var(--border);color:var(--ink-muted);cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ===== TAG MULTI-SELECT — Swiss chips ===== */
+.tag-select{display:flex;flex-wrap:wrap;gap:6px}
+.tag-option{padding:5px 14px;font-size:10px;cursor:pointer;border:1.5px solid var(--border);background:var(--warm-white);color:var(--ink-light);transition:all .12s ease;user-select:none;font-weight:500;letter-spacing:.4px;text-transform:uppercase}
+.tag-option:hover{border-color:var(--ikb);color:var(--ikb)}
+.tag-option.selected{background:var(--ikb);border-color:var(--ikb);color:#fff;font-weight:700}
+
+/* ===== ASPECT TOGGLE ===== */
+.aspect-toggle{display:flex;gap:0;width:fit-content;border:2px solid var(--ink)}
+.aspect-opt{padding:8px 22px;font-size:11px;cursor:pointer;background:var(--warm-white);color:var(--ink-light);transition:all .12s ease;font-weight:600;border:none;font-family:var(--font-sans);letter-spacing:.3px}
+.aspect-opt:first-child{border-right:2px solid var(--ink)}
+.aspect-opt.active{background:var(--ikb);color:#fff}
+
+/* ===== COLLAPSIBLE ===== */
+.collapse-toggle{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;color:var(--ink-light);cursor:pointer;user-select:none;padding:6px 0;letter-spacing:1px;text-transform:uppercase}
+.collapse-toggle:hover{color:var(--ikb)}
+.collapse-arrow{font-size:9px;transition:transform .2s ease;display:inline-block;font-family:var(--font-mono)}
+.collapse-arrow.open{transform:rotate(90deg)}
+.collapse-body{overflow:hidden;transition:max-height .35s ease;max-height:0}
+.collapse-body.open{max-height:800px}
+
+/* ===== QUALITY GRID ===== */
+.quality-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quality-item{padding:8px 10px;background:var(--paper);border:1.5px solid var(--border-light)}
+.quality-item .slider-label{font-size:9px;color:var(--ink-muted);margin-bottom:3px;display:block;letter-spacing:.5px;font-weight:600;text-transform:uppercase}
+.quality-item input[type="range"]{height:3px}
+.quality-item .slider-value{font-size:9px;border:none;padding:0;color:var(--ikb);font-weight:700}
+
+/* ===== TOGGLE SWITCH ===== */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.toggle-label{font-size:11px;color:var(--ink-light);font-weight:500}
+.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);transition:.2s ease;border:1.5px solid var(--ink)}
+.toggle-slider::before{content:"";position:absolute;height:16px;width:16px;left:2px;bottom:2px;background:var(--ink);transition:.2s ease}
+.toggle-switch input:checked+.toggle-slider{background:var(--ikb);border-color:var(--ikb-deep)}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(20px);background:var(--warm-white)}
+.toggle-hint{font-size:9px;color:var(--ink-muted);margin-top:4px;font-family:'Georgia','Times New Roman',serif;font-style:italic}
+
+/* ===== BADGES ===== */
+.warn-badge{padding:3px 10px;font-size:9px;border:1.5px solid var(--warning);background:rgba(196,134,64,.06);color:var(--warning);display:inline-flex;align-items:center;gap:4px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.comply-badge{padding:3px 10px;font-size:9px;border:1.5px solid var(--success);background:rgba(74,140,106,.06);color:var(--success);display:inline-flex;align-items:center;gap:4px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+
+/* ===== CENTER EMPTY/LOADING ===== */
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--ink-muted);position:relative;z-index:1}
+.empty-icon{font-size:64px;opacity:.08;font-family:var(--font-mono)}
+.loading-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;position:relative;z-index:1}
+.loading-spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--ikb);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:12px;color:var(--ink-light);font-weight:600;letter-spacing:.5px}
+
+/* ===== OUTPUT BLOCKS ===== */
+.output-block{background:var(--warm-white);padding:20px;border:1.5px solid var(--border);margin-bottom:14px;position:relative;z-index:1}
+.output-block h4{font-size:10px;font-weight:800;color:var(--ikb);margin-bottom:12px;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-sans);border-bottom:2px solid var(--border);padding-bottom:8px}
+.output-block p,.output-block li{font-size:12px;color:var(--ink-light);line-height:1.8}
+.output-block ul{padding-left:20px}
+
+/* ===== STORYBOARD TABLE — editorial ===== */
+.storyboard-table{width:100%;border-collapse:collapse;font-size:11px}
+.storyboard-table th{text-align:left;padding:10px 8px;color:var(--ink-muted);font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:1px;border-bottom:3px solid var(--ink);white-space:nowrap;font-family:var(--font-mono)}
+.storyboard-table td{padding:10px 8px;color:var(--ink-light);border-bottom:1px solid var(--border-light);vertical-align:top;line-height:1.6;font-size:11px}
+.storyboard-table .col-num{width:36px;color:var(--ikb);font-weight:800;text-align:center;font-family:var(--font-mono);font-size:13px}
+.storyboard-table .col-dur{width:44px;text-align:center;font-family:var(--font-mono)}
+.storyboard-table .col-type{width:54px;font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.4px}
+.storyboard-table .col-desc{min-width:140px}
+.storyboard-table .col-dialogue{min-width:100px}
+.storyboard-table .col-sound{min-width:80px;font-size:10px}
+.storyboard-table tr:hover td{background:rgba(0,47,167,.02)}
+.storyboard-table .purpose-tag{font-size:8px;padding:2px 8px;display:inline-block;margin-top:5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;border:1.5px solid}
+.purpose-hook{background:rgba(217,64,80,.06);color:var(--douyin);border-color:var(--douyin)}
+.purpose-show{background:rgba(0,47,167,.04);color:var(--ikb);border-color:var(--ikb)}
+.purpose-turn{background:rgba(196,134,64,.06);color:var(--warning);border-color:var(--warning)}
+.purpose-cta{background:rgba(74,140,106,.06);color:var(--success);border-color:var(--success)}
+
+/* ===== VIDEO INFO CARD ===== */
+.video-info-card{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.video-info-badge{padding:5px 12px;font-size:10px;background:var(--warm-white);border:1.5px solid var(--border);color:var(--ink-light);font-weight:500;letter-spacing:.3px}
+.video-info-badge strong{color:var(--ink);font-weight:700}
+
+/* ===== CTA DISPLAY ===== */
+.cta-option{padding:14px 18px;background:var(--paper);margin-bottom:8px;border-left:4px solid var(--ikb);font-size:12px;color:var(--ink);line-height:1.7;font-weight:500}
+
+/* ===== AI NOTICE ===== */
+.ai-notice{padding:14px 18px;background:rgba(240,192,64,.04);border:1.5px solid rgba(196,134,64,.15);font-size:10px;color:var(--warning);line-height:1.7;font-family:'Georgia','Times New Roman',serif;font-style:italic}
+
+/* ===== PARAM AXIS ===== */
+.param-axis-row{display:flex;align-items:center;gap:12px;margin-bottom:6px;padding:8px 12px;background:var(--paper);border:1px solid var(--border-light)}
+.param-axis-label{font-size:9px;font-weight:800;color:var(--ink-light);width:80px;flex-shrink:0;text-align:right;text-transform:uppercase;letter-spacing:.5px}
+.param-axis-slider{flex:1}
+.param-axis-val{font-size:10px;color:var(--ikb);font-weight:700;width:32px;text-align:center;flex-shrink:0;font-family:var(--font-mono);border:1.5px solid var(--border);padding:2px 6px}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--ikb);color:var(--cream);padding:14px 30px;font-weight:700;font-size:12px;opacity:0;transition:all .25s ease;z-index:100;pointer-events:none;border:2px solid var(--ikb-deep);letter-spacing:.6px;text-transform:uppercase;box-shadow:6px 6px 0 rgba(0,47,167,.15)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.error{background:var(--riso-red);border-color:#a33}
+.toast.warn{background:var(--warning);border-color:#a66;color:var(--ink)}
+
+/* ===== JIMENG BUTTON ===== */
+.btn-jimeng{padding:5px 12px;font-size:9px;border:1.5px solid var(--riso-blue);background:rgba(30,90,181,.04);color:var(--riso-blue);cursor:pointer;transition:all .12s ease;font-family:var(--font-mono);font-weight:600;letter-spacing:.3px}
+.btn-jimeng:hover{background:var(--riso-blue);color:#fff}
+.btn-jimeng:disabled{opacity:.3;cursor:not-allowed}
+
+/* ===== VIDEO TASK PANEL ===== */
+.video-task-panel{margin-top:12px;background:var(--warm-white);padding:14px;border:1.5px solid var(--border)}
+.video-task-item{display:flex;align-items:center;gap:12px;padding:10px;background:var(--paper);margin-bottom:6px;font-size:11px;border:1px solid var(--border-light)}
+.video-task-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.video-task-status.queued{background:var(--warning);animation:pulse 1s infinite}
+.video-task-status.running{background:var(--ikb);animation:pulse .6s infinite}
+.video-task-status.succeeded{background:var(--success)}
+.video-task-status.failed{background:var(--danger)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.video-task-info{flex:1;min-width:0}
+.video-task-shot{font-weight:700;color:var(--ikb);font-family:var(--font-mono)}
+.video-task-state{font-size:9px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.4px}
+.video-task-link{font-size:10px;color:var(--success);white-space:nowrap;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+
+/* ===== MODAL — editorial ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,26,36,.55);z-index:50;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:all .2s ease}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--warm-white);padding:32px;width:540px;max-width:92vw;border:3px solid var(--ink);box-shadow:10px 10px 0 rgba(0,0,0,.08);position:relative}
+.modal::before{content:'';position:absolute;top:12px;left:12px;width:20px;height:20px;border:2px solid var(--ikb);pointer-events:none}
+.modal h3{margin-bottom:20px;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:1px;font-family:var(--font-sans)}
+.modal .field-row{display:flex;gap:12px;margin-bottom:14px}
+.modal .field-row>div{flex:1}
+.jimeng-preview-prompt{background:var(--paper);padding:14px;font-size:11px;color:var(--ink-light);max-height:120px;overflow-y:auto;line-height:1.7;margin-bottom:14px;border:1.5px solid var(--border);font-family:var(--font-mono)}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:18px}
+
+/* ===== CONFLICT ACTIONS ===== */
+.conflict-actions{display:flex;gap:14px;margin-top:20px}
+.conflict-actions button{flex:1;padding:14px;font-size:12px;cursor:pointer;font-weight:800;border:2px solid var(--ink);font-family:var(--font-sans);transition:all .12s ease;text-transform:uppercase;letter-spacing:.6px;background:transparent}
+.conflict-actions button:first-child:hover{background:var(--ink);color:var(--cream)}
+.conflict-actions button:last-child{background:var(--ikb);color:#fff;border-color:var(--ikb)}
+.conflict-actions button:last-child:hover{background:var(--ikb-deep);box-shadow:4px 4px 0 rgba(0,47,167,.15)}
+
+/* ===== FOOTER — Swiss ===== */
+.footer{display:flex;align-items:center;justify-content:center;gap:20px;padding:0 28px;height:36px;min-height:36px;font-size:9px;color:var(--ink-muted);background:var(--warm-white);border-top:2px solid var(--ink);letter-spacing:.6px;text-transform:uppercase;font-family:var(--font-mono)}
+
+/* ===== PRESET ===== */
+.preset-row{display:flex;gap:8px;margin-top:8px}
+.preset-row select{flex:1;font-size:11px;padding:7px 12px}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1280px){.panel-left{width:260px;min-width:260px}.panel-right{width:240px;min-width:240px}}
+@media(max-width:960px){.panel-right{display:none}.panel-left{width:280px;min-width:280px}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left"><div class="logo">🎬</div><span class="app-name">AI 短视频分镜导演</span><span class="version-badge">V2.0</span><span class="header-warm">将你的产品故事，变成每一帧画面</span></div>
+  <div class="header-right">
+    <input type="password" id="arkApiKey" placeholder="火山引擎 ARK API Key (即梦)" style="width:180px;padding:5px 10px;border:1.5px solid var(--border);background:var(--warm-white);color:var(--ink);font-size:10px;font-family:var(--font-mono);" onchange="saveArkKey()">
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- ===== LEFT: 输入区 ===== -->
+  <div class="panel panel-left">
+    <div class="panel-title">📥 输入区</div>
+
+    <!-- V2: 文字粘贴 + 一键生成 -->
+    <div class="section" style="border:2.5px solid var(--ikb);background:rgba(0,47,167,.015);box-shadow:6px 6px 0 rgba(0,47,167,.04);">
+      <div class="section-label" style="font-size:13px;color:var(--ikb);">🚀 一键生成</div>
+      <textarea id="pasteInput" rows="4" placeholder="粘贴产品介绍、活动文案、公众号推文…&#10;AI 将自动提取产品名、卖点、目标人群和品牌调性"></textarea>
+      <button class="btn-auto" onclick="autoExtract()" id="btnAuto" style="margin-top:8px;">✨ 一键提取并生成</button>
+      <div style="font-size:10px;color:var(--ink-muted);margin-top:4px;">无需手动填写参数</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">🏷️ 产品名称 *</div>
+      <input type="text" id="productName" placeholder="例如：花西子空气蜜粉、三顿半超即溶咖啡">
+    </div>
+
+    <div class="section">
+      <div class="section-label">💡 核心卖点</div>
+      <div class="sp-list" id="spList">
+        <div class="sp-item"><input type="text" id="sp0" placeholder="卖点 1：控油持妆12小时"><button class="btn-remove" onclick="removeSP(0)" title="删除">✕</button></div>
+      </div>
+      <div class="sp-counter" id="spCounter">1/8 个卖点</div>
+      <button class="btn btn-ghost btn-sm" onclick="addSP()" id="btnAddSP" style="margin-top:6px;width:100%;">＋ 添加卖点</button>
+    </div>
+
+    <div class="section">
+      <div class="section-label">📱 目标平台</div>
+      <div class="platform-tags">
+        <div class="platform-tag douyin selected" onclick="togglePlatform(this,'douyin')">🎵 抖音</div>
+        <div class="platform-tag xiaohongshu" onclick="togglePlatform(this,'xiaohongshu')">📕 小红书</div>
+        <div class="platform-tag shipin" onclick="togglePlatform(this,'shipin')">📺 视频号</div>
+        <div class="platform-tag bilibili" onclick="togglePlatform(this,'bilibili')">🎮 B站</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">⏱️ 视频总时长</div>
+      <div class="slider-group">
+        <div class="slider-header"><span class="slider-label">总时长</span><span class="slider-value" id="totalDurVal" onclick="resetSlider('totalDuration')">30s</span></div>
+        <input type="range" id="totalDuration" min="5" max="60" step="5" value="30" oninput="updateSlider('totalDuration')" data-default="30">
+        <div class="slider-extremes"><span>5s</span><span>60s</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">🎨 视觉风格</div>
+      <select id="styleSelect">
+        <option value="realistic">写实真人</option><option value="cinematic">影视质感</option>
+        <option value="fresh" selected>治愈清新</option><option value="anime">二次元动漫</option>
+        <option value="minimal">极简高级</option><option value="vintage">复古胶片</option><option value="cyberpunk">赛博朋克</option>
+      </select>
+    </div>
+
+    <!-- V2: 违禁词处理模式 -->
+    <div class="section">
+      <div class="section-label">🛡️ 违禁词处理</div>
+      <div class="toggle-row">
+        <span class="toggle-label">默认合规近义表达</span>
+        <label class="toggle-switch"><input type="checkbox" id="banWordMode" onchange="toggleBanMode()"><span class="toggle-slider"></span></label>
+        <span class="toggle-label">谐音/形近字替代</span>
+      </div>
+      <div class="toggle-hint" id="banHint">默认：自动替换为合规近义表达（如"最好用"→"非常好用"）</div>
+    </div>
+
+    <!-- 进阶分镜设置 -->
+    <div class="section">
+      <div class="collapse-toggle" onclick="toggleCollapse('advSettings')">
+        <span class="collapse-arrow" id="advSettingsArrow">▶</span> ⚙️ 进阶分镜设置
+      </div>
+      <div class="collapse-body" id="advSettingsBody">
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="flex:1;">
+              <div class="section-label" style="margin-bottom:4px;">🎬 镜头数量</div>
+              <select id="shotCount"><option value="3">3 镜</option><option value="4">4 镜</option><option value="5" selected>5 镜</option><option value="6">6 镜</option><option value="7">7 镜</option><option value="8">8 镜</option></select>
+            </div>
+            <div style="flex:1;">
+              <div class="section-label" style="margin-bottom:4px;">📐 视频画幅</div>
+              <div class="aspect-toggle" id="aspectToggle">
+                <div class="aspect-opt active" onclick="setAspect('horizontal',this)">▬ 横屏 16:9</div>
+                <div class="aspect-opt" onclick="setAspect('vertical',this)">▯ 竖屏 9:16</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="flex:1;">
+              <div class="section-label" style="margin-bottom:4px;">单镜时长</div>
+              <div class="slider-group" style="margin:0;">
+                <div class="slider-header"><span class="slider-value" id="perShotDurVal" onclick="resetSlider('perShotDuration')">3.0s</span></div>
+                <input type="range" id="perShotDuration" min="1" max="10" step="0.5" value="3" oninput="updateSlider('perShotDuration')" data-default="3">
+                <div class="slider-extremes"><span>1s</span><span>10s</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="section-label" style="margin-bottom:4px;">🎥 运镜方式</div>
+            <div class="tag-select" id="movementTags">
+              <span class="tag-option" onclick="toggleTag(this)">推</span><span class="tag-option" onclick="toggleTag(this)">拉</span><span class="tag-option" onclick="toggleTag(this)">摇</span><span class="tag-option" onclick="toggleTag(this)">移</span><span class="tag-option" onclick="toggleTag(this)">跟</span><span class="tag-option" onclick="toggleTag(this)">俯拍</span><span class="tag-option" onclick="toggleTag(this)">仰拍</span><span class="tag-option" onclick="toggleTag(this)">微距</span><span class="tag-option" onclick="toggleTag(this)">固定</span>
+            </div>
+          </div>
+          <div>
+            <div class="section-label" style="margin-bottom:4px;">📐 构图偏好</div>
+            <div class="tag-select" id="compositionTags">
+              <span class="tag-option" onclick="toggleTag(this)">居中</span><span class="tag-option" onclick="toggleTag(this)">三分法</span><span class="tag-option" onclick="toggleTag(this)">对称</span><span class="tag-option" onclick="toggleTag(this)">全景</span><span class="tag-option" onclick="toggleTag(this)">特写</span><span class="tag-option" onclick="toggleTag(this)">引导线</span><span class="tag-option" onclick="toggleTag(this)">留白</span>
+            </div>
+          </div>
+          <div>
+            <div class="collapse-toggle" onclick="toggleCollapse('qualitySliders')" style="font-size:11px;">
+              <span class="collapse-arrow" id="qualitySlidersArrow">▶</span> 🎨 画面质感
+            </div>
+            <div class="collapse-body" id="qualitySlidersBody">
+              <div class="quality-grid" style="margin-top:6px;">
+                <div class="quality-item"><span class="slider-label">画面速度感</span><div class="slider-header"><span class="slider-value" id="speedVal" onclick="resetSlider('speed')">5</span></div><input type="range" id="speed" min="0" max="10" value="5" oninput="updateSlider('speed')" data-default="5"><div class="slider-extremes"><span>静态</span><span>高速</span></div></div>
+                <div class="quality-item"><span class="slider-label">光影强度</span><div class="slider-header"><span class="slider-value" id="lightVal" onclick="resetSlider('light')">5</span></div><input type="range" id="light" min="0" max="10" value="5" oninput="updateSlider('light')" data-default="5"><div class="slider-extremes"><span>柔和</span><span>强烈</span></div></div>
+                <div class="quality-item"><span class="slider-label">曝光度</span><div class="slider-header"><span class="slider-value" id="exposureVal" onclick="resetSlider('exposure')">0</span></div><input type="range" id="exposure" min="-5" max="5" value="0" oninput="updateSlider('exposure')" data-default="0"><div class="slider-extremes"><span>暗</span><span>亮</span></div></div>
+                <div class="quality-item"><span class="slider-label">对比度</span><div class="slider-header"><span class="slider-value" id="contrastVal" onclick="resetSlider('contrast')">5</span></div><input type="range" id="contrast" min="0" max="10" value="5" oninput="updateSlider('contrast')" data-default="5"><div class="slider-extremes"><span>低</span><span>高</span></div></div>
+                <div class="quality-item"><span class="slider-label">饱和度</span><div class="slider-header"><span class="slider-value" id="saturationVal" onclick="resetSlider('saturation')">5</span></div><input type="range" id="saturation" min="0" max="10" value="5" oninput="updateSlider('saturation')" data-default="5"><div class="slider-extremes"><span>黑白</span><span>浓艳</span></div></div>
+                <div class="quality-item"><span class="slider-label">清晰度</span><div class="slider-header"><span class="slider-value" id="sharpnessVal" onclick="resetSlider('sharpness')">7</span></div><input type="range" id="sharpness" min="0" max="10" value="7" oninput="updateSlider('sharpness')" data-default="7"><div class="slider-extremes"><span>柔和</span><span>锐利</span></div></div>
+                <div class="quality-item"><span class="slider-label">颗粒质感</span><div class="slider-header"><span class="slider-value" id="grainVal" onclick="resetSlider('grain')">2</span></div><input type="range" id="grain" min="0" max="10" value="2" oninput="updateSlider('grain')" data-default="2"><div class="slider-extremes"><span>无</span><span>强</span></div></div>
+                <div class="quality-item"><span class="slider-label">景深虚化</span><div class="slider-header"><span class="slider-value" id="dofVal" onclick="resetSlider('dof')">3</span></div><input type="range" id="dof" min="0" max="10" value="3" oninput="updateSlider('dof')" data-default="3"><div class="slider-extremes"><span>全清晰</span><span>强虚化</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-generate" id="btnGenerate" onclick="generate()">⚡ AI 生成分镜脚本</button>
+    <button class="btn btn-outline btn-sm" onclick="resetAll()" style="width:100%">↻ 重置</button>
+  </div>
+
+  <!-- ===== CENTER: 分镜脚本区 ===== -->
+  <div class="panel panel-center">
+    <div class="panel-title">📋 分镜脚本 & 分析</div>
+    <div id="centerContent" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-text">输入产品信息后点击生成</div>
+      <div style="font-size:12px;color:var(--ink-muted);">支持一键生成 · 违禁词规避 · 多平台差异化 · B站专属风格</div>
+    </div>
+  </div>
+
+  <!-- ===== RIGHT: CTA & 参数调节 & 建议区 ===== -->
+  <div class="panel panel-right">
+    <div class="panel-title">💬 CTA & 拍摄建议</div>
+    <div id="rightContent">
+      <div style="font-size:12px;color:var(--ink-muted);text-align:center;padding-top:40px;">生成分镜后，<br>CTA 文案和拍摄建议<br>将在此显示</div>
+    </div>
+
+    <!-- V2: 参数调节面板（生成后显示） -->
+    <div id="paramAdjustPanel" style="display:none;">
+      <div class="section">
+        <div class="collapse-toggle" onclick="toggleCollapse('paramAdjust')">
+          <span class="collapse-arrow" id="paramAdjustArrow">▶</span> 🎚️ 参数调节（六维数轴）
+        </div>
+        <div class="collapse-body" id="paramAdjustBody">
+          <div style="margin-top:8px;">
+            <div class="param-axis-row">
+              <span class="param-axis-label">节奏快慢</span>
+              <div class="param-axis-slider"><input type="range" id="axisPace" min="1" max="10" value="5" oninput="updateAxis('axisPace')"></div>
+              <span class="param-axis-val" id="axisPaceVal">5</span>
+            </div>
+            <div class="slider-extremes" style="margin-left:90px;margin-bottom:4px;"><span>1 慢节奏</span><span>10 快节奏</span></div>
+
+            <div class="param-axis-row">
+              <span class="param-axis-label">痛点强度</span>
+              <div class="param-axis-slider"><input type="range" id="axisPain" min="1" max="10" value="6" oninput="updateAxis('axisPain')"></div>
+              <span class="param-axis-val" id="axisPainVal">6</span>
+            </div>
+            <div class="slider-extremes" style="margin-left:90px;margin-bottom:4px;"><span>1 轻触</span><span>10 深度焦虑</span></div>
+
+            <div class="param-axis-row">
+              <span class="param-axis-label">产品展示占比</span>
+              <div class="param-axis-slider"><input type="range" id="axisProduct" min="1" max="10" value="7" oninput="updateAxis('axisProduct')"></div>
+              <span class="param-axis-val" id="axisProductVal">7</span>
+            </div>
+            <div class="slider-extremes" style="margin-left:90px;margin-bottom:4px;"><span>1 弱展示</span><span>10 强展示</span></div>
+
+            <div class="param-axis-row">
+              <span class="param-axis-label">情感调性</span>
+              <div class="param-axis-slider"><input type="range" id="axisEmotion" min="1" max="10" value="5" oninput="updateAxis('axisEmotion')"></div>
+              <span class="param-axis-val" id="axisEmotionVal">5</span>
+            </div>
+            <div class="slider-extremes" style="margin-left:90px;margin-bottom:4px;"><span>1 理性专业</span><span>10 感性共鸣</span></div>
+
+            <div class="param-axis-row">
+              <span class="param-axis-label">促销力度</span>
+              <div class="param-axis-slider"><input type="range" id="axisPromo" min="1" max="10" value="5" oninput="updateAxis('axisPromo')"></div>
+              <span class="param-axis-val" id="axisPromoVal">5</span>
+            </div>
+            <div class="slider-extremes" style="margin-left:90px;margin-bottom:4px;"><span>1 不提价格</span><span>10 强促转化</span></div>
+
+            <div class="param-axis-row">
+              <span class="param-axis-label">创意自由度</span>
+              <div class="param-axis-slider"><input type="range" id="axisCreative" min="1" max="10" value="5" oninput="updateAxis('axisCreative')"></div>
+              <span class="param-axis-val" id="axisCreativeVal">5</span>
+            </div>
+            <div class="slider-extremes" style="margin-left:90px;margin-bottom:4px;"><span>1 保守模板</span><span>10 大胆创意</span></div>
+
+            <button class="btn btn-primary btn-sm" onclick="regenerateWithParams()" style="width:100%;margin-top:6px;">🔄 按参数重新生成</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- V2: 预设保存/加载 -->
+      <div class="section" style="margin-top:6px;">
+        <div class="section-label">💾 参数预设</div>
+        <div style="display:flex;gap:4px;margin-bottom:6px;">
+          <input type="text" id="presetName" placeholder="预设名称" style="flex:1;padding:6px 8px;font-size:11px;">
+          <button class="btn btn-ghost btn-xs" onclick="savePreset()">保存</button>
+        </div>
+        <select id="presetSelect" onchange="loadPreset()" style="font-size:11px;padding:6px 8px;">
+          <option value="">— 已存预设 —</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="output-actions" style="margin-top:auto;display:flex;flex-direction:column;gap:6px;">
+      <button class="btn btn-primary btn-sm" onclick="copyAll()" id="btnCopyAll" disabled style="width:100%">📋 一键复制完整脚本</button>
+      <button class="btn btn-outline btn-sm" onclick="copyStoryboard()" id="btnCopyBoard" disabled style="width:100%">📊 仅复制分镜表</button>
+    </div>
+
+    <div class="video-task-panel" id="videoTaskPanel" style="display:none;">
+      <div style="font-size:11px;font-weight:600;color:var(--ink-light);margin-bottom:8px;">🎬 即梦生成任务</div>
+      <div id="videoTaskList"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer"><span>V2.0 营销版</span><span>|</span><span>AI 分镜导演</span><span>|</span><span>违禁词库 · B站 · 一键生成 · 参数调节</span><span>|</span><span>2026-05-24</span></footer>
+<div class="toast" id="toast"></div>
+
+<!-- Conflict Modal -->
+<div class="modal-overlay" id="conflictModal">
+  <div class="modal">
+    <h3>⚠️ 平台与时长组合建议</h3>
+    <p id="conflictMsg" style="font-size:13px;color:var(--ink-light);line-height:1.7;"></p>
+    <div class="conflict-actions">
+      <button onclick="dismissConflict('continue')" style="background:var(--beige);color:var(--ink);">继续生成</button>
+      <button onclick="dismissConflict('adjust')" style="background:var(--ikb);color:#fff;">调整参数</button>
+    </div>
+  </div>
+</div>
+
+<!-- Jimeng Modal -->
+<div class="modal-overlay" id="jimengModal">
+  <div class="modal">
+    <h3>🎬 发送到即梦生成视频</h3>
+    <input type="hidden" id="jimengShotIndex">
+    <div style="font-size:11px;color:var(--ink-muted);margin-bottom:4px;">将使用的 Prompt 预览：</div>
+    <div class="jimeng-preview-prompt" id="jimengPreviewPrompt"></div>
+    <div class="field-row">
+      <div><label style="font-size:11px;color:var(--ink-muted);">分辨率</label><select id="jimengResolution"><option value="720p">720p (便宜)</option><option value="1080p" selected>1080p (推荐)</option></select></div>
+      <div><label style="font-size:11px;color:var(--ink-muted);">时长（秒）</label><select id="jimengDuration"><option value="4">4s</option><option value="5" selected>5s</option><option value="6">6s</option><option value="8">8s</option><option value="10">10s</option></select></div>
+      <div><label style="font-size:11px;color:var(--ink-muted);">画幅</label><select id="jimengAspect"><option value="horizontal" selected>横屏 16:9</option><option value="vertical">竖屏 9:16</option></select></div>
+    </div>
+    <div style="font-size:10px;color:var(--ink-muted);margin-bottom:10px;">💰 1080p/5s ≈ ¥0.66 · 720p ≈ ¥0.33</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeJimengModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitToJimeng()" id="jimengSubmitBtn" style="background:var(--ikb);border-color:var(--ikb-deep);">🎬 提交生成</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== V2: 违禁词库 =====
+const BAN_WORDS = {
+  '最好':'非常好','第一':'行业领先','唯一':'为数不多','独家':'专有','顶级':'高品质','极品':'优质','首选':'推荐',
+  '金牌':'优秀','全网首发':'率先发布','全国第一':'市场领先','销量第一':'广受认可','最大':'大型','最高':'领先',
+  '最优':'优异','永久':'长期','万能':'多功能','100%':'高比例','绝不':'坚决','绝对':'确实','彻底':'充分',
+  '根治':'有效改善','完全':'全面','特效':'显著','一用就':'使用后','瞬间':'快速','立竿见影':'效果明显',
+  '纯天然':'自然','无副作用':'配方温和','国家级':'权威','秒杀':'优于','碾压':'超越',
+};
+const BAN_REPLACE = {
+  '最好':'蕞好','第一':'第①','敏感肌':'敏敏肌','美白':'米白','祛痘':'去痘','瘦身':'塑形',
+  '三天见效':'三天见笑','万元':'W','国家级':'国jia级',
+};
+let banWordMode = 'avoid'; // 'avoid' | 'replace'
+let conflictPending = null; // pending generation during conflict dialog
+
+function toggleBanMode() {
+  const checked = document.getElementById('banWordMode').checked;
+  banWordMode = checked ? 'replace' : 'avoid';
+  const hint = document.getElementById('banHint');
+  if (checked) {
+    hint.textContent = '替代：使用谐音/形近字替换（如"最好用"→"蕞好用"），请自行评估平台风险';
+    hint.style.color = 'var(--warning)';
+  } else {
+    hint.textContent = '默认：自动替换为合规近义表达（如"最好用"→"非常好用"）';
+    hint.style.color = 'var(--ink-muted)';
+  }
+}
+
+function filterBanWords(text) {
+  if (!text) return text;
+  let result = text;
+  if (banWordMode === 'avoid') {
+    for (const [key, val] of Object.entries(BAN_WORDS)) {
+      if (result.includes(key)) result = result.replaceAll(key, val);
+    }
+  } else {
+    for (const [key, val] of Object.entries(BAN_REPLACE)) {
+      if (result.includes(key)) result = result.replaceAll(key, val);
+    }
+  }
+  return result;
+}
+
+// ===== STATE =====
+let generatedData = null;
+const DS_API_KEY = 'sk-6d47b3a681194b639473a762a4ca9087';
+const DS_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+const DS_MODEL = 'deepseek-chat';
+const JIMENG_API = 'https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks';
+const JIMENG_MODEL = 'doubao-seedance-2-0-260128';
+let videoTasks = [];
+let spCount = 1;
+let presets = JSON.parse(localStorage.getItem('storyboard_presets') || '{}');
+
+const styleModifiers = {
+  realistic:{cn:'写实真人',en:'photorealistic, natural daylight, real skin texture'},
+  cinematic:{cn:'影视质感',en:'cinematic lighting, anamorphic lens, film grain, blockbuster color grading'},
+  fresh:{cn:'治愈清新',en:'bright airy, pastel tones, soft warm lighting, Korean drama aesthetic'},
+  anime:{cn:'二次元动漫',en:'anime style, clean lineart, cel shaded, vibrant colors'},
+  minimal:{cn:'极简高级',en:'minimalist, negative space, desaturated, clean geometric lines'},
+  vintage:{cn:'复古胶片',en:'film photography, warm amber tones, film grain, Kodak Portra, nostalgic'},
+  cyberpunk:{cn:'赛博朋克',en:'neon lights, high contrast, cyberpunk, blue purple palette'},
+};
+
+// ===== PRESETS =====
+function savePreset() {
+  const name = document.getElementById('presetName').value.trim();
+  if (!name) { showToast('请输入预设名称','warn'); return; }
+  const params = getAxisParams();
+  params._style = document.getElementById('styleSelect').value;
+  params._shotCount = parseInt(document.getElementById('shotCount').value);
+  params._aspectRatio = aspectRatio;
+  presets[name] = params;
+  localStorage.setItem('storyboard_presets', JSON.stringify(presets));
+  refreshPresetSelect();
+  document.getElementById('presetName').value = '';
+  showToast('预设「'+name+'」已保存');
+}
+
+function loadPreset() {
+  const name = document.getElementById('presetSelect').value;
+  if (!name || !presets[name]) return;
+  const p = presets[name];
+  Object.keys(p).forEach(k => {
+    if (k.startsWith('_')) return;
+    const el = document.getElementById(k);
+    if (el) { el.value = p[k]; updateAxis(k); }
+  });
+  if (p._style) document.getElementById('styleSelect').value = p._style;
+  if (p._shotCount) document.getElementById('shotCount').value = p._shotCount;
+  if (p._aspectRatio) { aspectRatio = p._aspectRatio; updateAspectUI(); }
+  showToast('预设「'+name+'」已加载');
+}
+
+function refreshPresetSelect() {
+  const sel = document.getElementById('presetSelect');
+  sel.innerHTML = '<option value="">— 已存预设 —</option>' +
+    Object.keys(presets).map(n => `<option value="${n}">${n}</option>`).join('');
+}
+
+// ===== SELLING POINTS =====
+function addSP() {
+  if (spCount >= 8) { showToast('最多添加 8 个卖点','warn'); return; }
+  spCount++;
+  const item = document.createElement('div'); item.className = 'sp-item';
+  item.innerHTML = `<input type="text" id="sp${spCount-1}" placeholder="卖点 ${spCount}"><button class="btn-remove" onclick="this.parentElement.remove();spCount--;updateSPCounter()" title="删除">✕</button>`;
+  document.getElementById('spList').appendChild(item);
+  updateSPCounter();
+}
+function removeSP(idx) {
+  if (spCount <= 1) { showToast('至少保留 1 个卖点','warn'); return; }
+  document.getElementById('sp'+idx).parentElement.remove(); spCount--;
+  updateSPCounter();
+}
+function updateSPCounter() {
+  document.getElementById('spCounter').textContent = spCount + '/8 个卖点';
+  document.getElementById('btnAddSP').style.display = spCount >= 8 ? 'none' : '';
+}
+function getSellingPoints() {
+  const sps = [];
+  for (let i = 0; i < spCount; i++) {
+    const el = document.getElementById('sp'+i);
+    if (el) { const v = el.value.trim(); if (v) sps.push(v); }
+  }
+  return sps;
+}
+
+// ===== PLATFORM =====
+let platforms = ['douyin'];
+function togglePlatform(el, id) {
+  el.classList.toggle('selected');
+  platforms = [];
+  document.querySelectorAll('.platform-tag.selected').forEach(t => {
+    if (t.classList.contains('douyin')) platforms.push('douyin');
+    if (t.classList.contains('xiaohongshu')) platforms.push('xiaohongshu');
+    if (t.classList.contains('shipin')) platforms.push('shipin');
+    if (t.classList.contains('bilibili')) platforms.push('bilibili');
+  });
+  if (!platforms.length) { el.classList.add('selected'); platforms.push(id); }
+}
+
+// ===== SLIDER =====
+function updateSlider(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  const valEl = document.getElementById(id+'Val');
+  if (!valEl) return;
+  if (id==='totalDuration') valEl.textContent = v.toFixed(0)+'s';
+  else if (id==='perShotDuration') valEl.textContent = v.toFixed(1)+'s';
+  else valEl.textContent = v;
+}
+function resetSlider(id) { const s=document.getElementById(id); s.value=s.dataset.default; updateSlider(id); }
+
+// ===== V2: AXIS SLIDERS =====
+function updateAxis(id) {
+  const v = document.getElementById(id).value;
+  const valEl = document.getElementById(id+'Val');
+  if (valEl) valEl.textContent = v;
+}
+function getAxisParams() {
+  return {
+    axisPace: parseInt(document.getElementById('axisPace').value),
+    axisPain: parseInt(document.getElementById('axisPain').value),
+    axisProduct: parseInt(document.getElementById('axisProduct').value),
+    axisEmotion: parseInt(document.getElementById('axisEmotion').value),
+    axisPromo: parseInt(document.getElementById('axisPromo').value),
+    axisCreative: parseInt(document.getElementById('axisCreative').value),
+  };
+}
+
+// ===== COLLAPSIBLE =====
+function toggleCollapse(id) {
+  const body = document.getElementById(id+'Body');
+  const arrow = document.getElementById(id+'Arrow');
+  if (!body || !arrow) return;
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+// ===== TAG MULTI-SELECT =====
+function toggleTag(el) { el.classList.toggle('selected'); }
+function getSelectedTags(containerId) {
+  const tags = document.querySelectorAll('#'+containerId+' .tag-option.selected');
+  return Array.from(tags).map(t=>t.textContent.trim());
+}
+
+// ===== ASPECT RATIO =====
+let aspectRatio = 'horizontal';
+function setAspect(val, el) {
+  aspectRatio = val;
+  document.querySelectorAll('.aspect-opt').forEach(o=>o.classList.remove('active'));
+  el.classList.add('active');
+}
+function updateAspectUI() {
+  document.querySelectorAll('.aspect-opt').forEach(o=>o.classList.remove('active'));
+  const target = document.querySelector(aspectRatio==='vertical'?'.aspect-opt:last-child':'.aspect-opt:first-child');
+  if (target) target.classList.add('active');
+}
+
+// ===== QUALITY PARAMS =====
+function getQualityParams() {
+  return {
+    speed: parseInt(document.getElementById('speed').value),
+    light: parseInt(document.getElementById('light').value),
+    exposure: parseInt(document.getElementById('exposure').value),
+    contrast: parseInt(document.getElementById('contrast').value),
+    saturation: parseInt(document.getElementById('saturation').value),
+    sharpness: parseInt(document.getElementById('sharpness').value),
+    grain: parseInt(document.getElementById('grain').value),
+    dof: parseInt(document.getElementById('dof').value),
+  };
+}
+
+// ===== V2: PLATFORM-DURATION CONFLICT CHECK =====
+function checkConflict() {
+  const dur = parseInt(document.getElementById('totalDuration').value);
+  const conflicts = [];
+  if (platforms.includes('douyin') && dur > 60) conflicts.push('抖音平台建议15-60秒，较长视频可能影响完播率');
+  if (platforms.includes('bilibili') && dur <= 15) conflicts.push('B站用户偏好30秒以上内容，15秒可能难以承载足够信息量');
+  if (platforms.includes('shipin') && dur <= 15) conflicts.push('视频号15秒偏短，难以体现稳重专业的平台调性');
+  if (platforms.length >= 3) {
+    // Check if any platform is set to bilibili with short duration
+    const hasBili = platforms.includes('bilibili');
+    const hasDouyin = platforms.includes('douyin');
+    if (hasBili && dur <= 15) conflicts.push('B站+短时长组合建议调整');
+  }
+  return conflicts;
+}
+
+function showConflictDialog(conflicts, callback) {
+  if (!conflicts.length) { callback(true); return; }
+  document.getElementById('conflictMsg').innerHTML = conflicts.map(c=>'• '+c).join('<br>')+'<br><br>是否继续生成？';
+  document.getElementById('conflictModal').classList.add('open');
+  conflictPending = callback;
+}
+
+function dismissConflict(action) {
+  document.getElementById('conflictModal').classList.remove('open');
+  if (conflictPending) {
+    const cb = conflictPending;
+    conflictPending = null;
+    cb(action === 'continue');
+  }
+}
+
+// ===== V2: AUTO EXTRACT (一键提取) =====
+async function autoExtract() {
+  const pasteText = document.getElementById('pasteInput').value.trim();
+  if (!pasteText) { showToast('请先粘贴产品介绍文本','warn'); return; }
+  if (pasteText.length < 10) { showToast('文本太短，请提供更详细的产品介绍','warn'); return; }
+
+  const btn = document.getElementById('btnAuto');
+  btn.disabled = true; btn.textContent = '🔍 AI 正在分析文本…';
+
+  try {
+    const extractPrompt = `你是一个产品信息提取助手。从以下产品介绍文本中提取关键信息，返回JSON：
+{
+  "product_name": "产品名称",
+  "selling_points": ["卖点1","卖点2","卖点3"],
+  "target_audience": "目标人群",
+  "brand_tone": "品牌调性",
+  "recommended_platforms": ["douyin","xiaohongshu"],
+  "recommended_duration": 30
+}
+
+文本内容：${pasteText.substring(0, 2000)}
+
+规则：
+- selling_points取最重要的3-5个
+- recommended_platforms从douyin/xiaohongshu/shipin/bilibili中选择最合适的1-3个
+- recommended_duration从15/30/60中选择最合适的
+- brand_tone如无法判断，根据品类推断
+- 直接返回JSON，不要其他内容`;
+
+    const resp = await fetch(DS_API_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+DS_API_KEY},
+      body:JSON.stringify({model:DS_MODEL,messages:[{role:'user',content:extractPrompt}],response_format:{type:'json_object'},temperature:0.3,max_tokens:1024}),
+    });
+
+    if (resp.ok) {
+      const data = await resp.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (content) {
+        const parsed = JSON.parse(content);
+        // Fill form
+        if (parsed.product_name) document.getElementById('productName').value = parsed.product_name;
+        if (parsed.selling_points && parsed.selling_points.length > 0) {
+          // Clear existing
+          document.getElementById('spList').innerHTML = '';
+          spCount = 0;
+          parsed.selling_points.slice(0, 8).forEach((sp, i) => {
+            spCount++;
+            const item = document.createElement('div'); item.className = 'sp-item';
+            item.innerHTML = `<input type="text" id="sp${i}" value="${escapeHtml(sp)}"><button class="btn-remove" onclick="this.parentElement.remove();spCount--;updateSPCounter()" title="删除">✕</button>`;
+            document.getElementById('spList').appendChild(item);
+          });
+          updateSPCounter();
+        }
+        if (parsed.recommended_platforms && parsed.recommended_platforms.length > 0) {
+          document.querySelectorAll('.platform-tag').forEach(t=>t.classList.remove('selected'));
+          platforms = parsed.recommended_platforms;
+          platforms.forEach(p => {
+            const tag = document.querySelector('.platform-tag.'+p);
+            if (tag) tag.classList.add('selected');
+          });
+        }
+        if (parsed.recommended_duration) {
+          document.getElementById('totalDuration').value = parsed.recommended_duration;
+          updateSlider('totalDuration');
+        }
+        // Store inferred info for display
+        if (parsed.target_audience) window._inferredAudience = parsed.target_audience;
+        if (parsed.brand_tone) window._inferredTone = parsed.brand_tone;
+
+        showToast('已提取：'+parsed.product_name+' · '+platforms.length+'个平台 · '+parsed.selling_points.length+'个卖点');
+        btn.disabled = false; btn.textContent = '✨ 一键提取并生成';
+        // Auto-trigger generate
+        generate();
+        return;
+      }
+    }
+    // Fallback: simple extract
+    fallbackExtract(pasteText);
+    generate();
+  } catch (err) {
+    console.warn('Auto extract failed:', err.message);
+    fallbackExtract(pasteText);
+    generate();
+  }
+  btn.disabled = false; btn.textContent = '✨ 一键提取并生成';
+}
+
+function fallbackExtract(text) {
+  // Simple heuristic extraction
+  const lines = text.split(/[。，\n；]/);
+  const productName = lines[0]?.substring(0, 50) || '未识别产品';
+  if (!document.getElementById('productName').value) document.getElementById('productName').value = productName.trim();
+  // Try to extract selling points (lines with numbers, keywords)
+  const spKeywords = ['AI','智能','续航','识别','导出','支持','功能','采用','搭载','重量','价格','首发'];
+  const foundSPs = lines.filter(l => spKeywords.some(k => l.includes(k))).slice(0,5);
+  if (foundSPs.length > 0) {
+    document.getElementById('spList').innerHTML = '';
+    spCount = 0;
+    foundSPs.forEach((sp, i) => {
+      spCount++;
+      const item = document.createElement('div'); item.className = 'sp-item';
+      item.innerHTML = `<input type="text" id="sp${i}" value="${escapeHtml(sp.trim().substring(0,40))}"><button class="btn-remove" onclick="this.parentElement.remove();spCount--;updateSPCounter()" title="删除">✕</button>`;
+      document.getElementById('spList').appendChild(item);
+    });
+    updateSPCounter();
+  }
+  showToast('已本地提取参数（AI提取超时，使用备用方案）','warn');
+}
+
+// ===== GENERATE =====
+async function generate(skipConflict) {
+  const product = document.getElementById('productName').value.trim();
+  const sps = getSellingPoints();
+  if (!product) { showToast('请输入产品名称','error'); return; }
+  if (!sps.length) { showToast('请至少输入 1 个卖点','warn'); }
+
+  if (!skipConflict) {
+    const conflicts = checkConflict();
+    if (conflicts.length > 0) {
+      showConflictDialog(conflicts, (proceed) => { if (proceed) generate(true); });
+      return;
+    }
+  }
+
+  const totalDur = parseInt(document.getElementById('totalDuration').value);
+  const styleKey = document.getElementById('styleSelect').value;
+  const shotCount = parseInt(document.getElementById('shotCount').value);
+  const perShotDur = parseFloat(document.getElementById('perShotDuration').value);
+  const movements = getSelectedTags('movementTags');
+  const compositions = getSelectedTags('compositionTags');
+  const quality = getQualityParams();
+  const axisParams = getAxisParams();
+
+  const advParams = { shotCount, perShotDur, aspectRatio, movements, compositions, quality, axisParams };
+
+  const btn = document.getElementById('btnGenerate');
+  btn.disabled = true; btn.textContent = '🤖 AI 正在分析产品、编排分镜…';
+
+  document.getElementById('centerContent').innerHTML = `<div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">DeepSeek AI 正在分析「${escapeHtml(product)}」</div><div style="font-size:11px;color:var(--ink-muted);">平台：${platforms.join('/')} · 时长：${totalDur}s · ${shotCount}镜 · ${aspectRatio==='vertical'?'竖屏':'横屏'} · 违禁词：${banWordMode==='avoid'?'规避':'替代'}</div></div>`;
+  document.getElementById('rightContent').innerHTML = '<div style="font-size:12px;color:var(--ink-muted);text-align:center;padding-top:40px;">正在生成…</div>';
+
+  try {
+    generatedData = await callDeepSeekAPI(product, sps, platforms, totalDur, styleKey, advParams);
+    // Apply ban word filter
+    generatedData = applyBanFilterToData(generatedData);
+  } catch (err) {
+    console.warn('API failed:', err.message);
+    showToast('API 失败，使用本地引擎生成','error');
+    generatedData = buildLocalResult(product, sps, platforms, totalDur, styleKey, advParams);
+    generatedData = applyBanFilterToData(generatedData);
+  }
+
+  renderOutput(generatedData);
+  btn.disabled = false; btn.textContent = '⚡ AI 生成分镜脚本';
+  document.getElementById('btnCopyAll').disabled = false;
+  document.getElementById('btnCopyBoard').disabled = false;
+  // Show param adjust panel
+  document.getElementById('paramAdjustPanel').style.display = 'block';
+  showToast('已生成 ' + generatedData.shots.length + ' 镜分镜脚本 · 总时长 ' + generatedData.video_info.duration);
+}
+
+function applyBanFilterToData(data) {
+  // Filter CTA copy
+  if (data.cta_copy) data.cta_copy = data.cta_copy.map(c => filterBanWords(c));
+  // Filter dialogues in shots
+  if (data.shots) data.shots.forEach(s => {
+    if (s.dialogue) s.dialogue = filterBanWords(s.dialogue);
+    if (s.visual_desc) s.visual_desc = filterBanWords(s.visual_desc);
+  });
+  // Filter shooting tips
+  if (data.shooting_tips) data.shooting_tips = data.shooting_tips.map(t => filterBanWords(t));
+  return data;
+}
+
+async function callDeepSeekAPI(product, sps, platforms, totalDur, styleKey, advParams) {
+  const mod = styleModifiers[styleKey] || styleModifiers.fresh;
+  const platStr = platforms.join('、');
+  const spStr = sps.length > 8 ? sps.slice(0,5).join('；') + '（已筛选最重要的' + Math.min(5, sps.length) + '个）' : sps.join('；');
+  const spCountNote = sps.length > 8 ? '\n注意：用户输入了'+sps.length+'个卖点，请筛选最重要的3-5个放入分镜中。' : (sps.length === 0 ? '\n注意：用户未提供卖点，请根据产品名称推断核心卖点。' : '');
+
+  const aspectNote = advParams.aspectRatio === 'vertical' ? '\n画幅：竖屏 9:16，画面为纵向构图。' : '\n画幅：横屏 16:9，画面为横向构图。';
+  const movNote = advParams.movements.length > 0 ? '\n指定运镜：' + advParams.movements.join('、') + '。请只使用这些运镜方式。' : '';
+  const compNote = advParams.compositions.length > 0 ? '\n指定构图：' + advParams.compositions.join('、') + '。请在分镜中运用这些构图方式。' : '';
+  const qual = advParams.quality;
+  const qualNote = `\n画面质感参数：速度感${qual.speed}/10、光影${qual.light}/10、曝光${qual.exposure}/5、对比度${qual.contrast}/10、饱和度${qual.saturation}/10、清晰度${qual.sharpness}/10、颗粒${qual.grain}/10、景深虚化${qual.dof}/10。请将这些质感融入画面描述中。`;
+  const shotNote = `\n用户指定生成${advParams.shotCount}个镜头，每个镜头平均约${(totalDur/advParams.shotCount).toFixed(1)}秒。请严格生成${advParams.shotCount}镜。`;
+
+  // V2: Axis params
+  const ax = advParams.axisParams || {};
+  const axisNote = `\n分镜风格参数：节奏快慢${ax.axisPace||5}/10（1=慢氛围,10=快高密度）、痛点强度${ax.axisPain||6}/10（1=轻触,10=深度焦虑）、产品展示占比${ax.axisProduct||7}/10（1=弱展示,10=强展示）、情感调性${ax.axisEmotion||5}/10（1=理性专业,10=感性共鸣）、促销力度${ax.axisPromo||5}/10（1=不提价格,10=强促转化）、创意自由度${ax.axisCreative||5}/10（1=保守模板,10=大胆创意）。请根据这些参数调整分镜的叙事风格和表达方式。`;
+
+  const banNote = banWordMode === 'avoid'
+    ? '\n文案合规要求：所有台词、CTA文案需规避广告法违禁词（如最好→非常好、第一→行业领先、100%→高比例、永久→长期、根治→有效改善、国家级→权威等），使用合规近义表达。'
+    : '\n文案合规要求：使用谐音/形近字替代违禁词（如最好→蕞好、敏感肌→敏敏肌、美白→米白），保留广告冲击力。';
+
+  const platformRules = {
+    douyin:'抖音风格：快节奏、强钩子、前3秒必须抓眼球、信息密度高、BGM卡点节奏感强、结尾有明确转化引导',
+    xiaohongshu:'小红书风格：精致生活感、氛围优先、画面唯美、慢节奏但不拖沓、文案像闺蜜分享、自然融入产品而非硬广、封面第一镜需视觉吸引力',
+    shipin:'视频号风格：稳重专业、信任感优先、数据/背书先行、节奏适中舒缓、信息完整度高于娱乐性、适合30-50岁用户审美、分享属性强于购买属性',
+    bilibili:'B站风格（V2新增）：反差/梗向/悬念开场、真诚感第一、节奏适中可加入幽默或吐槽元素、可用自嘲/反转/二次元梗吸引注意、信息密度适中不过度营销、CTA偏"三连"/弹幕互动引导而非硬促、片尾引导评论互动',
+  };
+  const platRulesStr = platforms.map(p => platformRules[p] || '').filter(Boolean).join('\n');
+
+  const inferredAudience = window._inferredAudience || '';
+  const inferredTone = window._inferredTone || '';
+
+  const systemPrompt = `你是一位资深广告分镜导演。你的任务是根据产品信息和平台要求，生成一份完整的短视频营销分镜脚本。
+
+【输入信息】
+- 产品：${product}
+- 卖点：${spStr}${spCountNote}
+- 平台：${platStr}
+- 总时长：${totalDur}秒
+- 视觉风格：${mod.cn}（${mod.en}）${aspectNote}${shotNote}${movNote}${compNote}${qualNote}${axisNote}${banNote}
+${inferredTone ? '- 品牌调性（自动推断）：' + inferredTone : ''}
+${inferredAudience ? '- 目标人群（自动推断）：' + inferredAudience : ''}
+
+【平台要求】
+${platRulesStr}
+
+【输出要求】
+请生成一个JSON对象，包含以下字段：
+{
+  "video_info": {
+    "product": "产品名",
+    "platform": "平台列表",
+    "duration": "总时长（秒）",
+    "style": "风格名",
+    "aspect": "横屏16:9或竖屏9:16",
+    "brand_tone": "自动推断的品牌调性，如'年轻活力/高端轻奢/国潮文化/科技感'",
+    "target_audience": "自动推断的目标人群，如'18-35岁精致女性/大学生/职场白领'"
+  },
+  "shots": [
+    {
+      "num": 1,
+      "duration": 3.0,
+      "scene_type": "远景/全景/中景/近景/特写",
+      "visual_desc": "画面描述（具体可视化，50-150字，摄像机看到的内容）",
+      "dialogue": "台词/旁白内容（注意：不要出现违禁词！）",
+      "sound_effect": "音效/BGM提示",
+      "camera_move": "运镜方式",
+      "purpose": "hook/show/turn/cta 之一"
+    }
+  ],
+  "hook_explanation": "开头钩子设计理由（1-2句，说明为什么选择该类型的开头）",
+  "turning_point": "节奏转折点说明（1-2句，说明在第几镜设置转折及原因）",
+  "cta_copy": ["CTA文案1（不要出现违禁词！）", "CTA文案2"],
+  "cta_position": "CTA位置说明（1-2句，说明CTA为什么放在该位置）",
+  "shooting_tips": ["拍摄建议1", "拍摄建议2"],
+  "ai_notice": "AI生成提示：本内容由AI自动生成，需人工确认品牌调性、产品信息准确性及合规性后方可使用。"
+}
+
+【关键规则】
+1. 所有镜头时长之和必须等于${totalDur}秒（允许±2秒误差）
+2. purpose字段分布：第1镜必须为hook，最后1镜必须为cta，中间镜为show或turn
+3. 必须严格生成${advParams.shotCount}个镜头
+4. 多平台时，为每个平台生成差异化内容（抖音快/小红书美/视频号稳/B站反差梗向）
+5. 品牌调性和目标人群如果没有明确给出，根据产品名称和卖点自动推断
+6. 每个镜头的dialogue必须做违禁词规避处理
+7. 直接返回JSON，不要任何额外解释`;
+
+  const userMessage = `请为产品"${product}"生成一个${totalDur}秒${advParams.shotCount}镜的${platStr}短视频分镜脚本。\n\n卖点：${spStr}\n风格：${mod.cn}\n画幅：${advParams.aspectRatio==='vertical'?'竖屏9:16':'横屏16:9'}\n违禁词模式：${banWordMode==='avoid'?'规避-替换为合规表达':'替代-使用谐音/形近字'}\n\n直接返回JSON。`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 50000);
+
+  try {
+    const resp = await fetch(DS_API_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+DS_API_KEY},
+      body:JSON.stringify({model:DS_MODEL,messages:[{role:'system',content:systemPrompt},{role:'user',content:userMessage}],response_format:{type:'json_object'},temperature:0.85,max_tokens:4096}),
+      signal:controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!resp.ok) throw new Error('API error '+resp.status);
+    const data = await resp.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error('Empty response');
+    const parsed = JSON.parse(content);
+    if (!parsed.shots || !Array.isArray(parsed.shots)) throw new Error('Invalid shots');
+    return parsed;
+  } finally { clearTimeout(timeoutId); }
+}
+
+function buildLocalResult(product, sps, platforms, totalDur, styleKey, advParams) {
+  const mod = styleModifiers[styleKey] || styleModifiers.fresh;
+  const plat = platforms[0] || 'douyin';
+  const spList = sps.length > 5 ? sps.slice(0,5) : (sps.length > 0 ? sps : ['品质卓越','体验出色']);
+  const platRules = {
+    douyin:{hook:'快节奏卡点',cta:'点击下方链接',tone:'年轻潮流',audience:'18-30岁年轻用户'},
+    xiaohongshu:{hook:'氛围感拉满',cta:'评论区告诉我',tone:'精致生活',audience:'22-35岁精致女性'},
+    shipin:{hook:'专业可信赖',cta:'扫码了解详情',tone:'稳重专业',audience:'30-50岁成熟用户'},
+    bilibili:{hook:'反转梗向开场',cta:'一键三连支持下',tone:'真诚有趣',audience:'18-28岁Z世代'},
+  };
+  const rule = platRules[plat] || platRules.douyin;
+
+  const shotCount = advParams.shotCount || 5;
+  const movements = advParams.movements.length > 0 ? advParams.movements : ['固定镜头','推','摇','移','跟'];
+  const compositions = advParams.compositions.length > 0 ? advParams.compositions : ['三分法','特写','居中'];
+  const aspectLabel = advParams.aspectRatio === 'vertical' ? '竖屏9:16' : '横屏16:9';
+  const ax = advParams.axisParams || {};
+
+  const shots = [];
+  for (let i = 0; i < shotCount; i++) {
+    const progress = i / (shotCount - 1 || 1);
+    const purpose = i === 0 ? 'hook' : i === shotCount - 1 ? 'cta' : (progress < 0.6 ? 'show' : 'turn');
+    const sceneTypes = ['特写','中景','近景','特写','中景','远景','近景','特写'];
+    const dur = (totalDur / shotCount).toFixed(1);
+    const mov = movements[i % movements.length];
+    const comp = compositions[i % compositions.length];
+    const spIdx = Math.min(i, spList.length - 1);
+
+    let desc = '';
+    if (purpose === 'hook') desc = `${product}产品特写，${mod.cn}风格，${mov}运镜，光线打在主体上，${spList[0]}的细节直观可见`;
+    else if (purpose === 'show') desc = `展示${product}的${spList[spIdx] || '核心功能'}，${mov}镜头，${comp}构图，画面清晰层次丰富`;
+    else if (purpose === 'turn') desc = `${mov}运镜切换场景，从产品功能转向生活方式，${product}融入日常的动人瞬间`;
+    else desc = `${product}最终展示，${mov}定格，品牌logo自然浮现，画面收束`;
+
+    let dialogue = '';
+    if (purpose === 'hook') dialogue = `你有没有遇到过…${spList[0]}？`;
+    else if (purpose === 'cta') dialogue = rule.cta;
+    else dialogue = spList[spIdx];
+
+    // Apply ban word filter
+    dialogue = filterBanWords(dialogue);
+    desc = filterBanWords(desc);
+
+    shots.push({
+      num: i+1, duration: dur, scene_type: sceneTypes[i % sceneTypes.length],
+      visual_desc: desc, dialogue, camera_move: mov,
+      sound_effect: purpose === 'hook' ? '节奏感强BGM起' : purpose === 'cta' ? 'BGM渐弱，品牌音效' : 'BGM持续，自然环境音',
+      purpose,
+    });
+  }
+
+  return {
+    video_info: {product,platform:plat,duration:totalDur+'s',style:mod.cn,aspect:aspectLabel,brand_tone:rule.tone,target_audience:rule.audience},
+    shots,
+    hook_explanation: `开场${rule.hook}，在${shots[0]?.duration || '3'}秒内展示${spList[0]}，快速建立用户兴趣。`,
+    turning_point: `第${Math.ceil(shotCount*0.6)}镜处进行节奏转折，从产品功能展示过渡到情感/场景共鸣。`,
+    cta_copy: [rule.cta, `了解更多${product}信息`].map(c=>filterBanWords(c)),
+    cta_position: `视频最后${shots[shotCount-1]?.duration || '3'}秒，待产品展示完毕后自然引出行动引导。`,
+    shooting_tips: [`使用${mod.cn}风格的灯光和色调`,`重点拍摄${spList[0]}的细节镜头`,`采用${movements.join('、') || '多种运镜'}增加画面动感`],
+    ai_notice: 'AI生成提示：本内容由AI自动生成，需人工确认品牌调性、产品信息准确性及合规性后方可使用。',
+  };
+}
+
+// ===== V2: REGENERATE WITH PARAM ADJUSTMENT =====
+async function regenerateWithParams() {
+  if (!generatedData) { showToast('请先生成一次分镜','warn'); return; }
+  await generate(true);
+}
+
+// ===== RENDER OUTPUT =====
+function renderOutput(data) {
+  const vi = data.video_info || {};
+  const totalSec = data.shots.reduce((s,sh)=>s+parseFloat(sh.duration||0), 0);
+  const banLabel = banWordMode === 'avoid' ? '已合规' : '已替代';
+  const banClass = banWordMode === 'avoid' ? 'comply-badge' : 'warn-badge';
+
+  let centerHTML = `
+    <div class="output-block">
+      <h4>📹 视频信息总览</h4>
+      <div class="video-info-card">
+        <div class="video-info-badge">🏷️ <strong>${escapeHtml(vi.product||'')}</strong></div>
+        <div class="video-info-badge">📱 <strong>${escapeHtml(vi.platform||'')}</strong></div>
+        <div class="video-info-badge">⏱️ <strong>${escapeHtml(vi.duration||'')}</strong>（实际${totalSec.toFixed(0)}s）</div>
+        <div class="video-info-badge">🎨 <strong>${escapeHtml(vi.style||'')}</strong></div>
+        <div class="video-info-badge">🎯 <strong>${escapeHtml(vi.brand_tone||'')}</strong></div>
+        <div class="video-info-badge">📐 <strong>${escapeHtml(vi.aspect||'横屏16:9')}</strong></div>
+        <div class="video-info-badge">👥 <strong>${escapeHtml(vi.target_audience||'')}</strong></div>
+        <span class="${banClass}" style="margin-left:4px;">🛡️ 违禁词${banLabel}</span>
+      </div>
+    </div>
+
+    <div class="output-block">
+      <h4>📋 完整分镜脚本表（${data.shots.length}镜 · 总${totalSec.toFixed(0)}秒）</h4>
+      <div style="overflow-x:auto;">
+        <table class="storyboard-table">
+          <thead><tr>
+            <th class="col-num">#</th><th class="col-dur">时长</th><th class="col-type">景别</th>
+            <th class="col-desc">画面描述</th><th class="col-dialogue">台词/旁白</th>
+            <th class="col-sound">音效/BGM</th><th class="col-sound">运镜</th>
+            <th style="width:36px;"></th>
+          </tr></thead>
+          <tbody>`;
+
+  data.shots.forEach((s,i) => {
+    const purposeLabels = {hook:'钩子',show:'展示',turn:'转折',cta:'CTA'};
+    const pl = purposeLabels[s.purpose] || '';
+    centerHTML += `<tr>
+      <td class="col-num">${s.num}</td>
+      <td class="col-dur">${s.duration}s</td>
+      <td class="col-type">${s.scene_type||''}</td>
+      <td class="col-desc">${escapeHtml(s.visual_desc||'')}<br><span class="purpose-tag purpose-${s.purpose||'show'}">${pl}</span></td>
+      <td class="col-dialogue">${escapeHtml(s.dialogue||'')}</td>
+      <td class="col-sound">${escapeHtml(s.sound_effect||'')}</td>
+      <td class="col-sound">${escapeHtml(s.camera_move||'')}</td>
+      <td><button class="btn-jimeng" onclick="openJimengModal(${i})" title="发送到即梦生成">🎬</button></td>
+    </tr>`;
+  });
+
+  centerHTML += `</tbody></table></div></div>
+
+    <div class="output-block">
+      <h4>💡 创意分析</h4>
+      <p><strong>🎣 钩子设计：</strong>${escapeHtml(data.hook_explanation||'')}</p>
+      <p style="margin-top:6px;"><strong>🔄 节奏转折点：</strong>${escapeHtml(data.turning_point||'')}</p>
+      <p style="margin-top:6px;"><strong>📍 CTA 位置：</strong>${escapeHtml(data.cta_position||'')}</p>
+    </div>`;
+
+  document.getElementById('centerContent').innerHTML = centerHTML;
+
+  // Right panel
+  const ctas = (data.cta_copy || []).map(c => `<div class="cta-option">${escapeHtml(c)}</div>`).join('');
+  const tips = (data.shooting_tips || []).map(t => `<li>${escapeHtml(t)}</li>`).join('');
+
+  document.getElementById('rightContent').innerHTML = `
+    <div class="output-block">
+      <h4>📢 CTA 文案 <span class="${banClass}" style="font-size:10px;margin-left:4px;">违禁词${banLabel}</span></h4>
+      ${ctas}
+    </div>
+    <div class="output-block">
+      <h4>🎥 拍摄建议</h4>
+      <ul>${tips}</ul>
+    </div>
+    <div class="ai-notice">⚠️ ${escapeHtml(data.ai_notice||'AI生成提示：本内容由AI自动生成，需人工确认品牌调性、产品信息准确性及合规性后方可使用。')}</div>`;
+}
+
+// ===== COPY =====
+function copyAll() {
+  if (!generatedData) return;
+  const vi = generatedData.video_info;
+  let text = `【AI短视频分镜脚本 V2.0】\n产品：${vi.product} | 平台：${vi.platform} | 时长：${vi.duration} | 风格：${vi.style} | 画幅：${vi.aspect||'横屏16:9'}\n品牌调性：${vi.brand_tone} | 目标人群：${vi.target_audience} | 违禁词：${banWordMode==='avoid'?'已规避':'已替代'}\n\n`;
+  text += `====== 分镜脚本表 ======\n`;
+  generatedData.shots.forEach(s => {
+    text += `镜${s.num} [${s.duration}s] ${s.scene_type} | 运镜：${s.camera_move||''} | ${s.visual_desc} | 台词：${s.dialogue} | 音效：${s.sound_effect}\n`;
+  });
+  text += `\n【钩子设计】${generatedData.hook_explanation}\n【节奏转折】${generatedData.turning_point}\n`;
+  text += `【CTA文案】${(generatedData.cta_copy||[]).join(' / ')}\n【CTA位置】${generatedData.cta_position}\n`;
+  text += `【拍摄建议】${(generatedData.shooting_tips||[]).join('；')}\n\n`;
+  text += `⚠️ ${generatedData.ai_notice}`;
+  copyToClipboard(text);
+  showToast('已复制完整分镜脚本');
+}
+
+function copyStoryboard() {
+  if (!generatedData) return;
+  let text = generatedData.shots.map(s =>
+    `镜${s.num} | ${s.duration}s | ${s.scene_type} | 运镜：${s.camera_move||''} | ${s.visual_desc} | 台词："${s.dialogue}" | ${s.sound_effect}`
+  ).join('\n');
+  copyToClipboard(text);
+  showToast('已复制分镜表（' + generatedData.shots.length + '镜）');
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard) { navigator.clipboard.writeText(text); return; }
+  const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px';
+  document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+}
+
+// ===== JIMENG =====
+function saveArkKey() { const k = document.getElementById('arkApiKey').value.trim(); if (k) localStorage.setItem('ark_api_key', k); }
+(function(){ const saved = localStorage.getItem('ark_api_key'); if (saved) document.getElementById('arkApiKey').value = saved; })();
+
+function openJimengModal(idx) {
+  if (!generatedData || !generatedData.shots[idx]) return;
+  document.getElementById('jimengShotIndex').value = idx;
+  const shot = generatedData.shots[idx];
+  document.getElementById('jimengPreviewPrompt').textContent = `产品：${generatedData.video_info.product}\n画面：${shot.visual_desc}\n景别：${shot.scene_type}\n风格：${generatedData.video_info.style}\n运镜：${shot.camera_move||''}`;
+  const viAspect = generatedData.video_info.aspect || '';
+  document.getElementById('jimengAspect').value = viAspect.includes('竖') ? 'vertical' : 'horizontal';
+  const shotDur = parseFloat(shot.duration) || 5;
+  const durSelect = document.getElementById('jimengDuration');
+  const closest = Array.from(durSelect.options).sort((a,b) => Math.abs(parseInt(a.value)-shotDur)-Math.abs(parseInt(b.value)-shotDur))[0];
+  if (closest) durSelect.value = closest.value;
+  document.getElementById('jimengModal').classList.add('open');
+}
+function closeJimengModal() { document.getElementById('jimengModal').classList.remove('open'); }
+
+async function submitToJimeng() {
+  const arkKey = document.getElementById('arkApiKey').value.trim();
+  if (!arkKey) { showToast('请先在顶部输入火山引擎 ARK API Key','error'); return; }
+  const idx = parseInt(document.getElementById('jimengShotIndex').value);
+  if (!generatedData || !generatedData.shots[idx]) return;
+  const shot = generatedData.shots[idx];
+  const resolution = document.getElementById('jimengResolution').value;
+  const duration = parseInt(document.getElementById('jimengDuration').value);
+  const jimengAspect = document.getElementById('jimengAspect').value;
+  const btn = document.getElementById('jimengSubmitBtn');
+  btn.disabled = true; btn.textContent = '⏳ 提交中…';
+  closeJimengModal();
+
+  const task = { shotNum:shot.num, shotIdx:idx, status:'submitting', taskId:null, videoUrl:null, error:null };
+  videoTasks.unshift(task);
+  renderVideoTasks();
+  document.getElementById('videoTaskPanel').style.display = 'block';
+
+  try {
+    const resp = await fetch(JIMENG_API, {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+arkKey},
+      body:JSON.stringify({model:JIMENG_MODEL,content:[{type:'text',text:shot.visual_desc}],resolution,duration,aspect_ratio:jimengAspect==='vertical'?'9:16':'16:9',watermark:false}),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error?.message || 'HTTP '+resp.status);
+    if (!data.id) throw new Error('未返回任务ID');
+    task.taskId = data.id; task.status = 'queued';
+    renderVideoTasks();
+    showToast('镜'+shot.num+' 已提交即梦 · '+data.id.substring(0,16)+'…');
+    pollTask(videoTasks.indexOf(task));
+  } catch (err) {
+    task.status = 'failed'; task.error = err.message;
+    renderVideoTasks();
+    showToast('提交失败: '+err.message,'error');
+  }
+  btn.disabled = false; btn.textContent = '🎬 提交生成';
+}
+
+async function pollTask(ti) {
+  const arkKey = document.getElementById('arkApiKey').value.trim();
+  if (!arkKey) return;
+  const task = videoTasks[ti];
+  if (!task || !task.taskId) return;
+  for (let i = 0; i < 60; i++) {
+    await new Promise(r=>setTimeout(r,8000));
+    try {
+      const resp = await fetch(JIMENG_API+'/'+task.taskId, {headers:{'Authorization':'Bearer '+arkKey}});
+      const data = await resp.json();
+      if (!resp.ok) { task.status='failed'; task.error=data.error?.message; renderVideoTasks(); return; }
+      task.status = data.status || 'running';
+      if (data.status === 'succeeded') { task.videoUrl = data.content?.video_url||''; task.status='succeeded'; renderVideoTasks(); showToast('镜'+task.shotNum+' 视频完成！'); return; }
+      if (['failed','expired','cancelled'].includes(data.status)) { task.status=data.status; task.error=data.error?.message; renderVideoTasks(); return; }
+      renderVideoTasks();
+    } catch (err) { task.status='failed'; task.error=err.message; renderVideoTasks(); return; }
+  }
+  task.status='failed'; task.error='超时'; renderVideoTasks();
+}
+
+function renderVideoTasks() {
+  const c = document.getElementById('videoTaskList');
+  if (!videoTasks.length) { c.innerHTML='<span style="font-size:11px;color:var(--ink-muted);">暂无任务</span>'; document.getElementById('videoTaskPanel').style.display='none'; return; }
+  document.getElementById('videoTaskPanel').style.display='block';
+  const labels = {submitting:'提交中…',queued:'排队中',running:'生成中…',succeeded:'完成',failed:'失败'};
+  c.innerHTML = videoTasks.map(t => `
+    <div class="video-task-item">
+      <div class="video-task-status ${t.status==='succeeded'?'succeeded':t.status==='failed'?'failed':t.status}"></div>
+      <div class="video-task-info"><div class="video-task-shot">镜${t.shotNum}</div><div class="video-task-state">${labels[t.status]||t.status}</div></div>
+      ${t.videoUrl?`<a class="video-task-link" href="${t.videoUrl}" target="_blank">📥 下载</a>`:''}
+      ${t.error?`<span style="font-size:10px;color:var(--danger);" title="${t.error}">⚠️</span>`:''}
+    </div>`).join('');
+}
+
+// ===== RESET =====
+function resetAll() {
+  document.getElementById('productName').value = '';
+  document.getElementById('pasteInput').value = '';
+  document.getElementById('styleSelect').value = 'fresh';
+  document.getElementById('totalDuration').value = 30; updateSlider('totalDuration');
+  document.getElementById('shotCount').value = '5';
+  document.getElementById('perShotDuration').value = 3; updateSlider('perShotDuration');
+  document.querySelectorAll('#movementTags .tag-option.selected').forEach(t=>t.classList.remove('selected'));
+  document.querySelectorAll('#compositionTags .tag-option.selected').forEach(t=>t.classList.remove('selected'));
+  setAspect('horizontal', document.querySelector('.aspect-opt:first-child'));
+  ['speed','light','exposure','contrast','saturation','sharpness','grain','dof'].forEach(id=>{document.getElementById(id).value=document.getElementById(id).dataset.default;updateSlider(id);});
+  // Reset axis sliders
+  ['axisPace','axisPain','axisProduct','axisEmotion','axisPromo','axisCreative'].forEach(id=>{document.getElementById(id).value=5;updateAxis(id);});
+  // Reset ban mode
+  document.getElementById('banWordMode').checked = false;
+  banWordMode = 'avoid';
+  document.getElementById('banHint').textContent = '默认：自动替换为合规近义表达（如"最好用"→"非常好用"）';
+  document.getElementById('banHint').style.color = 'var(--ink-muted)';
+  // Reset platform
+  document.querySelectorAll('.platform-tag').forEach(t=>t.classList.remove('selected'));
+  document.querySelector('.platform-tag.douyin').classList.add('selected');
+  platforms = ['douyin'];
+  spCount = 1;
+  document.getElementById('spList').innerHTML = '<div class="sp-item"><input type="text" id="sp0" placeholder="卖点 1"><button class="btn-remove" onclick="removeSP(0)" title="删除">✕</button></div>';
+  updateSPCounter();
+  generatedData = null;
+  window._inferredAudience = null;
+  window._inferredTone = null;
+  document.getElementById('paramAdjustPanel').style.display = 'none';
+  document.getElementById('centerContent').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">输入产品信息后点击生成</div><div style="font-size:12px;color:var(--ink-muted);">支持一键生成 · 违禁词规避 · 多平台差异化 · B站专属风格</div></div>`;
+  document.getElementById('rightContent').innerHTML = '<div style="font-size:12px;color:var(--ink-muted);text-align:center;padding-top:40px;">生成分镜后，<br>CTA 文案和拍摄建议<br>将在此显示</div>';
+  document.getElementById('btnCopyAll').disabled = true;
+  document.getElementById('btnCopyBoard').disabled = true;
+  videoTasks = []; renderVideoTasks();
+  showToast('已重置所有参数');
+}
+
+// ===== TOAST =====
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (type ? ' ' + type : '');
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(()=>t.classList.remove('show'),2500);
+}
+function escapeHtml(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+// Init
+refreshPresetSelect();
+</script>
+</body>
+</html>
